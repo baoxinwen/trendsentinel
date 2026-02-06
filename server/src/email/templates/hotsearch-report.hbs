@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>{{title}}</title>
+  <style>{{{cssContent}}}</style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>🔍 热搜哨兵 - 热点报告</h1>
+      <div class="subtitle">{{reportTime}} | {{frequency}}</div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Summary -->
+      {{#if summary}}
+      <div class="summary">
+        <div class="summary-title">📊 报告摘要</div>
+        <p class="summary-text">{{summary}}</p>
+      </div>
+      {{/if}}
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">{{totalItems}}</div>
+          <div class="stat-label">热点总数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{totalPlatforms}}</div>
+          <div class="stat-label">平台数量</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{topScore}}</div>
+          <div class="stat-label">最高热度</div>
+        </div>
+      </div>
+
+      <!-- Platform Sections -->
+      {{#each groupedItems}}
+      <div class="section">
+        <div class="section-title">
+          <span class="platform-badge platform-{{toLowerCase @key}}">{{platformConfig @key 'label'}}</span>
+          {{platformConfig @key 'icon'}} ({{this.length}}条)
+        </div>
+        <ul class="hotsearch-list">
+          {{#each (sortRank this)}}
+          <li class="hotsearch-item">
+            <div class="rank{{#if (isTopThree rank)}} top-3{{/if}}">{{rank}}</div>
+            <div class="item-content">
+              <h3 class="item-title">
+                <a href="{{url}}" target="_blank" rel="noopener">{{title}}</a>
+              </h3>
+              <div class="item-meta">
+                {{#if category}}<span>{{category}}</span>{{/if}}
+                <span class="score">{{formatScore score}}</span>
+              </div>
+            </div>
+          </li>
+          {{/each}}
+        </ul>
+      </div>
+      {{/each}}
+
+      <!-- No Data Message -->
+      {{#unless groupedItems}}
+      <div class="section">
+        <p style="text-align: center; color: #6b7280; padding: 40px;">
+          暂无符合条件的热点数据
+        </p>
+      </div>
+      {{/unless}}
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>您收到此邮件是因为订阅了 <strong>热搜哨兵</strong> 热点推送服务</p>
+      <p>如需取消订阅，请联系管理员</p>
+      <p style="margin-top: 16px;">
+        <a href="#">查看完整报告</a> | <a href="#">管理订阅设置</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

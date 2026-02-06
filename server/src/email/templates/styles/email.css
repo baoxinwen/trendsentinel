@@ -1,0 +1,256 @@
+/* Email Template Styles for HotSearch Report */
+
+/* Reset */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f3f4f6;
+  color: #1f2937;
+  line-height: 1.6;
+}
+
+/* Container */
+.email-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #ffffff;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px;
+  text-align: center;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.header .subtitle {
+  margin-top: 8px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+/* Content */
+.content {
+  padding: 32px;
+}
+
+/* Section */
+.section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* Platform Badge */
+.platform-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  margin-right: 8px;
+}
+
+.platform-bilibili { background-color: #f472b6; }
+.platform-weibo { background-color: #ef4444; }
+.platform-zhihu { background-color: #3b82f6; }
+.platform-douyin { background-color: #000000; }
+.platform-baidu { background-color: #2563eb; }
+.platform-default { background-color: #6b7280; }
+
+/* Hot Search List */
+.hotsearch-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.hotsearch-item {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.hotsearch-item:last-child {
+  border-bottom: none;
+}
+
+.hotsearch-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Rank */
+.rank {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.rank.top-3 {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+}
+
+/* Item Content */
+.item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.item-title a:hover {
+  color: #667eea;
+}
+
+.item-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Score */
+.score {
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  color: #ef4444;
+}
+
+.score::before {
+  content: '🔥 ';
+  margin-right: 2px;
+}
+
+/* Footer */
+.footer {
+  background-color: #f9fafb;
+  padding: 24px 32px;
+  text-align: center;
+  font-size: 12px;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Summary */
+.summary {
+  background-color: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.summary-title {
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 8px;
+}
+
+.summary-text {
+  font-size: 14px;
+  color: #78350f;
+  margin: 0;
+}
+
+/* Responsive */
+@media only screen and (max-width: 600px) {
+  .header {
+    padding: 24px 16px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hotsearch-item {
+    padding: 8px;
+  }
+}
