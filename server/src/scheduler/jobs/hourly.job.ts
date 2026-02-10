@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EmailService } from '../../email/email.service';
 import { ConfigService } from '../../config/config.service';
@@ -7,13 +7,16 @@ import { ConfigService } from '../../config/config.service';
  * Hourly hot search report job
  * Runs every hour at the top of the hour
  */
+@Injectable()
 export class HourlyJob {
   private readonly logger = new Logger(HourlyJob.name);
 
   constructor(
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.logger.log('HourlyJob initialized');
+  }
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleHourlyJob() {

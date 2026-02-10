@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import * as hbs from 'hbs';
+import * as Handlebars from 'handlebars';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { HotsearchService } from '../hotsearch/hotsearch.service';
@@ -38,14 +38,16 @@ export class EmailService {
     }
 
     this.transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure,
+      host: host,
+      port: port,
+      secure: secure,
       auth: {
-        user,
-        pass,
+        user: user,
+        pass: pass,
       },
-    });
+      // Ensure UTF-8 encoding for all messages
+      utf8: true,
+    } as any);
 
     this.logger.log(`Email transporter initialized: ${host}:${port}`);
   }
@@ -58,8 +60,14 @@ export class EmailService {
       return this.templateCache;
     }
 
-    const templatePath = path.join(__dirname, 'templates', 'hotsearch-report.hbs');
-    const cssPath = path.join(__dirname, 'templates', 'styles', 'email.css');
+    // Use src directory in development, dist in production
+    const isDev = process.env.NODE_ENV === 'development';
+    const basePath = isDev
+      ? path.join(process.cwd(), 'src', 'email')
+      : __dirname;
+
+    const templatePath = path.join(basePath, 'templates', 'hotsearch-report.hbs');
+    const cssPath = path.join(basePath, 'templates', 'styles', 'email.css');
 
     try {
       const [template, css] = await Promise.all([
@@ -71,6 +79,8 @@ export class EmailService {
       return this.templateCache;
     } catch (error) {
       this.logger.error(`Failed to load email template: ${error.message}`);
+      this.logger.error(`Template path: ${templatePath}`);
+      this.logger.error(`CSS path: ${cssPath}`);
       throw error;
     }
   }
@@ -79,14 +89,14 @@ export class EmailService {
    * Register Handlebars helpers
    */
   private registerHelpers() {
-    hbs.registerHelper('toLowerCase', (str: string) => str.toLowerCase());
+    Handlebars.registerHelper('toLowerCase', (str: string) => str.toLowerCase());
 
-    hbs.registerHelper('platformConfig', (platform: Platform, key: string) => {
+    Handlebars.registerHelper('platformConfig', (platform: Platform, key: string) => {
       const config = PLATFORM_CONFIG[platform];
       return config ? config[key] : '';
     });
 
-    hbs.registerHelper('formatScore', (score: number) => {
+    Handlebars.registerHelper('formatScore', (score: number) => {
       if (score >= 100000000) {
         return `${(score / 100000000).toFixed(1)}亿`;
       } else if (score >= 10000) {
@@ -95,11 +105,15 @@ export class EmailService {
       return score.toString();
     });
 
-    hbs.registerHelper('isTopThree', (rank: number) => rank <= 3);
+    Handlebars.registerHelper('isTopThree', (rank: number) => rank <= 3);
 
-    hbs.registerHelper('sortRank', (items: HotSearchItemDto[]) => {
+    Handlebars.registerHelper('sortRank', (items: HotSearchItemDto[]) => {
       return items.sort((a, b) => a.rank - b.rank);
     });
+
+    Handlebars.registerHelper('greaterThan', (a: number, b: number) => a > b);
+
+    Handlebars.registerHelper('subtract', (a: number, b: number) => a - b);
   }
 
   /**
@@ -109,7 +123,7 @@ export class EmailService {
     this.registerHelpers();
     const { template, css } = await this.loadTemplate();
 
-    const compiledTemplate = hbs.compile(template);
+    const compiledTemplate = Handlebars.compile(template);
     return compiledTemplate({ ...data, cssContent: css });
   }
 
@@ -144,17 +158,30 @@ export class EmailService {
         };
       }
 
+      // Parse platforms from config if not provided in options
+      let platforms = options.platforms;
+      if (!platforms && config.platforms) {
+        const platformNames = config.platforms.split(',').map(p => p.trim());
+        platforms = platformNames as Platform[];
+      }
+
+      // Use minScore from config if not provided in options
+      const minScore = options.minScore !== undefined ? options.minScore : config.minScore;
+
+      // Use keyword from config if not provided in options
+      const keyword = options.keyword || config.keyword;
+
       // Fetch hot search data
       const forceRefresh = true;
-      const allItems = options.platforms
-        ? await this.hotsearchService.fetchMultiplePlatforms(options.platforms, forceRefresh)
+      const allItems = platforms && platforms.length > 0
+        ? await this.hotsearchService.fetchMultiplePlatforms(platforms, forceRefresh)
         : await this.hotsearchService.fetchAllPlatforms(forceRefresh);
 
       // Filter items
       const filteredItems = this.hotsearchService.filterItems(allItems, {
-        minScore: options.minScore,
-        keyword: options.keyword,
-        platforms: options.platforms,
+        minScore,
+        keyword,
+        platforms,
       });
 
       if (filteredItems.length === 0) {
@@ -180,7 +207,7 @@ export class EmailService {
 
       // Compile email template
       const html = await this.compileTemplate({
-        title: options.subject || '热搜哨兵 - 热点报告',
+        title: options.subject || 'TrendMonitor 热搜监控 - 热点报告',
         reportTime: new Date().toLocaleString('zh-CN', {
           year: 'numeric',
           month: 'long',
@@ -198,13 +225,14 @@ export class EmailService {
       });
 
       // Send email
-      const mailFrom = this.configService.get<string>('MAIL_FROM', '热搜哨兵 <noreply@example.com>');
+      const mailFrom = this.configService.get<string>('MAIL_FROM', 'TrendMonitor 热搜监控 <noreply@example.com>');
 
       const info = await this.transporter.sendMail({
         from: mailFrom,
         to: recipients.join(', '),
-        subject: options.subject || '热搜哨兵 - 热点报告',
+        subject: options.subject || 'TrendMonitor 热搜监控 - 热点报告',
         html,
+        encoding: 'utf-8',
       });
 
       this.logger.log(`Email sent successfully: ${info.messageId}`);
@@ -227,15 +255,15 @@ export class EmailService {
    */
   async sendTestEmail(recipient: string): Promise<{ success: boolean; message: string }> {
     try {
-      const mailFrom = this.configService.get<string>('MAIL_FROM', '热搜哨兵 <noreply@example.com>');
+      const mailFrom = this.configService.get<string>('MAIL_FROM', 'TrendMonitor 热搜监控 <noreply@example.com>');
 
       const info = await this.transporter.sendMail({
         from: mailFrom,
         to: recipient,
-        subject: '热搜哨兵 - 测试邮件',
+        subject: 'TrendMonitor 热搜监控 - 测试邮件',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #667eea;">🔍 热搜哨兵</h1>
+            <h1 style="color: #667eea;">🔍 TrendMonitor 热搜监控</h1>
             <p>这是一封测试邮件。</p>
             <p>如果您收到此邮件，说明邮件服务配置正确。</p>
             <hr style="margin: 20px 0; border: none; border-top: 1px solid #e5e7eb;">

@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { EmailService } from '../../email/email.service';
 import { ConfigService } from '../../config/config.service';
@@ -7,13 +7,16 @@ import { ConfigService } from '../../config/config.service';
  * Daily hot search report job
  * Runs at configured time (default 9:00 AM)
  */
+@Injectable()
 export class DailyJob {
   private readonly logger = new Logger(DailyJob.name);
 
   constructor(
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.logger.log('DailyJob initialized');
+  }
 
   /**
    * Calculate cron expression from HH:mm time format

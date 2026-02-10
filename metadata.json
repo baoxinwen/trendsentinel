@@ -1,5 +1,5 @@
 {
-  "name": "TrendSentinel (热搜哨兵)",
+  "name": "TrendMonitor (热搜监控)",
   "description": "一个全能的热搜监控面板，利用 UApiPro 接口获取真实实时热搜数据，支持多平台聚合、多关键词筛选、历史回溯、数据导出及邮件订阅通知。",
   "requestFramePermissions": []
 }

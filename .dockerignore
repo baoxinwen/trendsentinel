@@ -1,22 +1,16 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
 # Dependencies
 node_modules/
-package-lock.json
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Build outputs
 dist/
 dist-ssr/
 build/
+*.tsbuildinfo
 
-# Environment files - Security sensitive
+# Local env files - Security sensitive
 .env
 .env.local
 .env.*.local
@@ -50,39 +44,31 @@ Desktop.ini
 $nul
 nul
 
-# Server (backend)
-server/node_modules/
-server/dist/
-server/.env
-server/.env.local
-server/package-lock.json
+# Git
+.git/
+.gitignore
+.github/
 
-# Privacy & Security sensitive files
-*.key
-*.pem
-*.cert
-*.crt
-*.p12
-*.pfx
-keystore/
-secrets/
-credentials/
-*.credentials
-auth_tokens.json
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Docker files (don't copy into image)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+coverage/
+.nyc_output/
 
 # Temporary & cache files
 *.tmp
 *.temp
 .cache/
 .parcel-cache/
-.next/
-.nuxt/
-.vite/
-
-# Coverage & testing
-coverage/
-.nyc_output/
-*.lcov
 
 # Misc
 *.swp

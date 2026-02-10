@@ -13,7 +13,7 @@ export class SendEmailDto {
 
   @ApiPropertyOptional({
     description: 'Email subject',
-    example: '热搜哨兵 - 热点报告',
+    example: 'TrendMonitor - 热点报告',
   })
   @IsOptional()
   @IsString()

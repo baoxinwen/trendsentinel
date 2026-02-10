@@ -6,6 +6,7 @@ import { ConfigModule as AppConfigModule } from './config/config.module';
 import { HotsearchModule } from './hotsearch/hotsearch.module';
 import { EmailModule } from './email/email.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     HotsearchModule,    // Hot search data fetching
     EmailModule,        // Email sending service
     SchedulerModule,    // Scheduled tasks
+    HealthModule,       // Health check endpoint
   ],
   controllers: [],
   providers: [],

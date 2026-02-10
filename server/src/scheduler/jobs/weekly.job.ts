@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EmailService } from '../../email/email.service';
 import { ConfigService } from '../../config/config.service';
@@ -7,13 +7,16 @@ import { ConfigService } from '../../config/config.service';
  * Weekly hot search report job
  * Runs every Monday at 9:00 AM
  */
+@Injectable()
 export class WeeklyJob {
   private readonly logger = new Logger(WeeklyJob.name);
 
   constructor(
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.logger.log('WeeklyJob initialized');
+  }
 
   @Cron(CronExpression.EVERY_WEEK, {
     name: 'weeklyHotSearchReport',
@@ -30,7 +33,7 @@ export class WeeklyJob {
       this.logger.log('Starting weekly hot search report...');
 
       const result = await this.emailService.sendHotSearchReport({
-        subject: '热搜哨兵 - 周报',
+        subject: 'TrendMonitor - 周报',
       });
 
       if (result.success) {

@@ -1,4 +1,4 @@
-import { IsEmail, IsArray, IsIn, IsOptional, IsString, Matches } from 'class-validator';
+import { IsEmail, IsArray, IsIn, IsOptional, IsString, Matches, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class EmailConfigDto {
@@ -34,6 +34,30 @@ export class EmailConfigDto {
     example: true,
   })
   enabled: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of platforms to include',
+    example: 'Bilibili,Weibo,Zhihu',
+  })
+  @IsOptional()
+  @IsString()
+  platforms?: string;
+
+  @ApiPropertyOptional({
+    description: 'Minimum score filter',
+    example: 10000,
+  })
+  @IsOptional()
+  @IsNumber()
+  minScore?: number;
+
+  @ApiPropertyOptional({
+    description: 'Keyword filter',
+    example: 'AI',
+  })
+  @IsOptional()
+  @IsString()
+  keyword?: string;
 }
 
 export class UpdateEmailConfigDto {
@@ -73,4 +97,28 @@ export class UpdateEmailConfigDto {
   })
   @IsOptional()
   enabled?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Comma-separated list of platforms to include',
+    example: 'Bilibili,Weibo,Zhihu',
+  })
+  @IsOptional()
+  @IsString()
+  platforms?: string;
+
+  @ApiPropertyOptional({
+    description: 'Minimum score filter',
+    example: 10000,
+  })
+  @IsOptional()
+  @IsNumber()
+  minScore?: number;
+
+  @ApiPropertyOptional({
+    description: 'Keyword filter',
+    example: 'AI',
+  })
+  @IsOptional()
+  @IsString()
+  keyword?: string;
 }

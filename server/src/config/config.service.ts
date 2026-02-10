@@ -7,6 +7,9 @@ const DEFAULT_EMAIL_CONFIG: EmailConfigDto = {
   frequency: 'daily',
   sendTime: '09:00',
   enabled: false,
+  platforms: undefined,
+  minScore: undefined,
+  keyword: undefined,
 };
 
 const CONFIG_FILENAME = 'email-config';

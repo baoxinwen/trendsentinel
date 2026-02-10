@@ -60,6 +60,34 @@ const PLATFORM_API_MAP: Record<Platform, string> = {
 // Cache to respect API etiquette and improve performance
 const cache: Record<string, { data: HotSearchItem[], timestamp: number }> = {};
 const CACHE_DURATION = 60 * 1000; // 1 minute
+const MAX_CACHE_SIZE = 50; // Limit cache size to prevent memory bloat
+
+// Clean up expired cache entries
+const cleanupExpiredCache = () => {
+  const now = Date.now();
+  const cacheKeys = Object.keys(cache);
+
+  // Remove expired entries
+  cacheKeys.forEach(key => {
+    if (now - cache[key].timestamp > CACHE_DURATION) {
+      delete cache[key];
+    }
+  });
+
+  // If cache is still too large, remove oldest entries
+  const remainingKeys = Object.keys(cache);
+  if (remainingKeys.length > MAX_CACHE_SIZE) {
+    remainingKeys
+      .sort((a, b) => cache[a].timestamp - cache[b].timestamp)
+      .slice(0, remainingKeys.length - MAX_CACHE_SIZE)
+      .forEach(key => delete cache[key]);
+  }
+};
+
+// Run cleanup periodically (every 5 minutes)
+if (typeof window !== 'undefined') {
+  setInterval(cleanupExpiredCache, 5 * 60 * 1000);
+}
 
 // Helper to parse various "hot" value formats into a number
 const parseScore = (val: string | number | undefined): number => {
@@ -94,6 +122,9 @@ const parseScore = (val: string | number | undefined): number => {
 const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const fetchPlatformHotSearches = async (platform: Platform, forceRefresh: boolean = false, retryCount: number = 0): Promise<HotSearchItem[]> => {
+  // Clean up expired cache entries before fetching
+  cleanupExpiredCache();
+
   // Check cache first (unless forceRefresh is true)
   const cached = cache[platform];
   if (!forceRefresh && cached && (Date.now() - cached.timestamp < CACHE_DURATION)) {

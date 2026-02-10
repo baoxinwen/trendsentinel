@@ -1,0 +1,72 @@
+version: '3.8'
+
+# Production Docker Compose configuration
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+
+services:
+  # Frontend - React + Vite + nginx
+  frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/trendmonitor}-frontend:${IMAGE_TAG:-latest}
+    container_name: trendmonitor-frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - trendmonitor-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Backend - NestJS API
+  backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/trendmonitor}-backend:${IMAGE_TAG:-latest}
+    container_name: trendmonitor-backend
+    restart: always
+    ports:
+      - "${BACKEND_PORT:-3001}:3001"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - API_PREFIX=api
+      # CORS - Should be set to your actual domain
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://yourdomain.com}
+      # Storage
+      - DATA_DIR=/app/data
+    volumes:
+      # Persist email configuration and snapshots
+      - trendmonitor-data:/app/data
+    networks:
+      - trendmonitor-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  trendmonitor-network:
+    driver: bridge
+
+volumes:
+  trendmonitor-data:
+    driver: local

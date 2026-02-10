@@ -1,6 +1,6 @@
-# 热搜哨兵 (TrendSentinel) Backend API
+# 热搜监控 (TrendMonitor) Backend API
 
-NestJS backend server for TrendSentinel hot search monitoring and email subscription service.
+NestJS backend server for TrendMonitor hot search monitoring and email subscription service.
 
 ## Features
 
@@ -60,7 +60,7 @@ SMTP_PORT=465
 SMTP_SECURE=true
 SMTP_USER=your-email@163.com
 SMTP_PASSWORD=your-authorization-code
-MAIL_FROM=热搜哨兵 <your-email@163.com>
+MAIL_FROM=热搜监控 <your-email@163.com>
 
 # API Authentication
 API_KEY=your-secret-api-key

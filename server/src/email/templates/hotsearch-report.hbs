@@ -11,7 +11,7 @@
   <div class="email-container">
     <!-- Header -->
     <div class="header">
-      <h1>🔍 热搜哨兵 - 热点报告</h1>
+      <h1>🔍 TrendMonitor 热搜监控 - 热点报告</h1>
       <div class="subtitle">{{reportTime}} | {{frequency}}</div>
     </div>
 
@@ -50,6 +50,7 @@
         </div>
         <ul class="hotsearch-list">
           {{#each (sortRank this)}}
+          {{#if (isTopThree @index)}}
           <li class="hotsearch-item">
             <div class="rank{{#if (isTopThree rank)}} top-3{{/if}}">{{rank}}</div>
             <div class="item-content">
@@ -57,13 +58,16 @@
                 <a href="{{url}}" target="_blank" rel="noopener">{{title}}</a>
               </h3>
               <div class="item-meta">
-                {{#if category}}<span>{{category}}</span>{{/if}}
                 <span class="score">{{formatScore score}}</span>
               </div>
             </div>
           </li>
+          {{/if}}
           {{/each}}
         </ul>
+        {{#if (greaterThan this.length 5)}}
+        <p class="more-hint">...还有 {{subtract this.length 5}} 条热点，请查看完整报告</p>
+        {{/if}}
       </div>
       {{/each}}
 
@@ -79,7 +83,7 @@
 
     <!-- Footer -->
     <div class="footer">
-      <p>您收到此邮件是因为订阅了 <strong>热搜哨兵</strong> 热点推送服务</p>
+      <p>您收到此邮件是因为订阅了 <strong>TrendMonitor 热搜监控</strong> 热点推送服务</p>
       <p>如需取消订阅，请联系管理员</p>
       <p style="margin-top: 16px;">
         <a href="#">查看完整报告</a> | <a href="#">管理订阅设置</a>

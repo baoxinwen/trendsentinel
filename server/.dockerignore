@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Local env files - Security sensitive
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local data files - Privacy sensitive
+data/*.json
+data/*.bak
+!data/.gitkeep
+
+# Editor directories and files
+.vscode/*
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+Thumbs.db
+.Spotlight-V100
+.Trashes
+Desktop.ini
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+test/
+coverage/
+.nyc_output/
+
+# Temporary & cache files
+*.tmp
+*.temp
+.cache/
+
+# Misc
+*.swp
+*.swo
+*~

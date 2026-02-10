@@ -45,8 +45,8 @@ async function bootstrap() {
 
   if (swaggerEnabled) {
     const config = new DocumentBuilder()
-      .setTitle('TrendSentinel API')
-      .setDescription('热搜哨兵 - Hot Search Monitor Backend API')
+      .setTitle('TrendMonitor API')
+      .setDescription('TrendMonitor - Hot Search Monitor Backend API')
       .setVersion('1.0')
       .addApiKey(
         {
@@ -72,16 +72,18 @@ async function bootstrap() {
         showRequestDuration: true,
       },
     });
-
-    console.log(`📚 Swagger documentation available at: http://localhost:${await app.getUrl()}/docs`);
   }
 
   // Start server
   const port = configService.get<number>('PORT', 3001);
   await app.listen(port);
 
+  if (swaggerEnabled) {
+    console.log(`📚 Swagger documentation available at: http://localhost:${port}/docs`);
+  }
+
   console.log(`
-🔍 热搜哨兵 (TrendSentinel) Backend API
+🔍 TrendMonitor Backend API
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   Environment: ${configService.get<string>('NODE_ENV', 'development')}
   Port: ${port}
