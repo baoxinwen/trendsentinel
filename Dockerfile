@@ -25,17 +25,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Add non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nginx -u 1001 && \
-    chown -R nginx:nodejs /usr/share/nginx/html && \
-    chown -R nginx:nodejs /var/cache/nginx && \
-    chown -R nginx:nodejs /var/log/nginx && \
-    touch /var/run/nginx.pid && \
-    chown -R nginx:nodejs /var/run/nginx.pid
-
-# Switch to non-root user
-USER nginx
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
 
 EXPOSE 80
 
