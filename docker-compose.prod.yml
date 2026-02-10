@@ -6,7 +6,7 @@ version: '3.8'
 services:
   # Frontend - React + Vite + nginx
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/trendmonitor}-frontend:${IMAGE_TAG:-latest}
+    image: ghcr.io/baoxinwen/trendsentinel-frontend:latest
     container_name: trendmonitor-frontend
     restart: always
     ports:
@@ -18,7 +18,7 @@ services:
     networks:
       - trendmonitor-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -31,21 +31,35 @@ services:
 
   # Backend - NestJS API
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/trendmonitor}-backend:${IMAGE_TAG:-latest}
+    image: ghcr.io/baoxinwen/trendsentinel-backend:latest
     container_name: trendmonitor-backend
     restart: always
     ports:
       - "${BACKEND_PORT:-3001}:3001"
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
       - API_PREFIX=api
       # CORS - Should be set to your actual domain
       - CORS_ORIGIN=${CORS_ORIGIN:-https://yourdomain.com}
+      # SMTP Configuration
+      - SMTP_HOST=${SMTP_HOST:-smtp.163.com}
+      - SMTP_PORT=${SMTP_PORT:-465}
+      - SMTP_SECURE=${SMTP_SECURE:-true}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM:-TrendMonitor <noreply@trendmonitor.com>}
+      # API Authentication
+      - API_KEY=${API_KEY}
+      - API_KEY_HEADER=X-API-Key
+      # API Configuration
+      - UAPI_BASE_URL=https://uapis.cn/api/v1/misc/hotboard
+      - API_TIMEOUT=15000
+      - CACHE_DURATION=60000
       # Storage
       - DATA_DIR=/app/data
+      # Swagger (disable in production if desired)
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
     volumes:
       # Persist email configuration and snapshots
       - trendmonitor-data:/app/data

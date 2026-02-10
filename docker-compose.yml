@@ -3,9 +3,7 @@ version: '3.8'
 services:
   # Frontend - React + Vite + nginx
   frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ghcr.io/baoxinwen/trendsentinel-frontend:latest
     container_name: trendmonitor-frontend
     restart: unless-stopped
     ports:
@@ -17,7 +15,7 @@ services:
     networks:
       - trendmonitor-network
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -25,9 +23,7 @@ services:
 
   # Backend - NestJS API
   backend:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
+    image: ghcr.io/baoxinwen/trendsentinel-backend:latest
     container_name: trendmonitor-backend
     restart: unless-stopped
     ports:
