@@ -22,7 +22,8 @@
 - 支持 48+ 中文主流平台（微博、知乎、B站、抖音、百度等）
 - 实时数据刷新，自动获取最新热搜
 - 平台分类展示，支持按类别筛选
-- 移动端适配，随时随地查看
+- 智能热度值显示（>=1万显示"w"格式，<1万显示具体数值）
+- 筛选状态和自动刷新设置自动保存
 
 ### 📈 趋势分析
 - 关键词频次统计（TOP 20）
@@ -54,7 +55,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/hotsearch-monitor.git
+git clone https://github.com/baoxinwen/hotsearch-monitor.git
 cd hotsearch-monitor
 
 # 复制环境变量配置
@@ -66,7 +67,7 @@ cp .env.docker.example .env
 # - SMTP_PASSWORD: 163 邮箱授权码
 # - API_KEY: 自定义 API 密钥
 
-# 启动服务
+# 启动服务（使用预构建镜像）
 docker-compose up -d
 
 # 查看日志
@@ -79,7 +80,7 @@ docker-compose down
 服务启动后访问：
 - 前端：http://localhost:3002
 - 后端 API：http://localhost:3001
-- Swagger 文档：http://localhost:3001/docs
+- Swagger 文档：http://localhost:3001/api/docs
 
 #### 本地构建镜像
 
@@ -101,7 +102,7 @@ docker-compose build
 
 ```bash
 # 克隆项目
-git clone https://github.com/your-username/hotsearch-monitor.git
+git clone https://github.com/baoxinwen/hotsearch-monitor.git
 cd hotsearch-monitor
 
 # 安装前端依赖
@@ -162,8 +163,8 @@ DATA_DIR=./data
 
 项目提供预构建的 Docker 镜像，支持多架构（amd64/arm64）：
 
-- **Frontend**: `ghcr.io/your-username/trendmonitor-frontend:latest`
-- **Backend**: `ghcr.io/your-username/trendmonitor-backend:latest`
+- **Frontend**: `ghcr.io/baoxinwen/trendmonitor-frontend:latest`
+- **Backend**: `ghcr.io/baoxinwen/trendmonitor-backend:latest`
 
 ### GitHub Actions 自动构建
 
@@ -274,6 +275,8 @@ hotsearch-monitor/
 ├── src/                 # 前端源码
 │   └── api/            # API 配置
 ├── utils/              # 工具函数
+├── services/           # API 服务
+│   └── geminiService.ts # UApiPro 集成
 ├── types.ts            # 类型定义
 ├── constants.ts        # 常量配置
 └── index.html          # HTML 入口

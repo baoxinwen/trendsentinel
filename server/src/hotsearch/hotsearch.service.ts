@@ -98,7 +98,7 @@ export class HotsearchService {
         id: `${platform}-${Date.now()}-${index}`,
         rank: index + 1,
         title: item.title || '未知标题',
-        score: parseScore(item.hot || item.heat || item.score || item.value),
+        score: parseScore(item.hot_value || item.hot || item.heat || item.score || item.value),
         platform: platform,
         url: item.url || item.link || item.mobileUrl || '#',
         timestamp: Date.now(),

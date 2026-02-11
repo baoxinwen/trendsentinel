@@ -10,7 +10,6 @@ import { PLATFORM_CATEGORIES } from './constants';
 import { fetchPlatformHotSearches as fetchDirectHotSearches } from './services/geminiService';
 import { buildUrl, getApiHeaders, API_ENDPOINTS } from './src/api/config';
 import { Save, Download, ArrowLeft, Clock, Menu, CheckCircle, AlertCircle } from 'lucide-react';
-import { buildUrl, getApiHeaders, API_ENDPOINTS } from './src/api/config';
 
 const App: React.FC = () => {
   // --- State ---
@@ -31,15 +30,36 @@ const App: React.FC = () => {
 
   // Filters
   const [keywords, setKeywords] = useState<string[]>([]);
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([
-    Platform.Weibo, Platform.Baidu, Platform.Zhihu, Platform.Bilibili, Platform.Douyin
-  ]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(() => {
+    try {
+      const saved = localStorage.getItem('trendmonitor_selected_platforms');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // 验证解析后的平台是否有效
+        if (Array.isArray(parsed) && parsed.every(p => Object.values(Platform).includes(p))) {
+          return parsed;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to parse selected platforms from localStorage:', error);
+    }
+    // 默认平台
+    return [Platform.Weibo, Platform.Baidu, Platform.Zhihu, Platform.Bilibili, Platform.Douyin];
+  });
 
   // Ref to track latest selectedPlatforms for auto-refresh
   const selectedPlatformsRef = useRef(selectedPlatforms);
 
   // Auto Refresh
-  const [autoRefresh, setAutoRefresh] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(() => {
+    try {
+      const saved = localStorage.getItem('trendmonitor_auto_refresh');
+      return saved === 'true';
+    } catch (error) {
+      console.error('Failed to parse auto refresh from localStorage:', error);
+      return false;
+    }
+  });
 
   // History
   const [history, setHistory] = useState<HistorySnapshot[]>(() => {
@@ -262,6 +282,16 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('trendmonitor_history', JSON.stringify(history));
   }, [history]);
+
+  // 保存选中的平台到 localStorage
+  useEffect(() => {
+    localStorage.setItem('trendmonitor_selected_platforms', JSON.stringify(selectedPlatforms));
+  }, [selectedPlatforms]);
+
+  // 保存自动刷新状态到 localStorage
+  useEffect(() => {
+    localStorage.setItem('trendmonitor_auto_refresh', String(autoRefresh));
+  }, [autoRefresh]);
 
   // --- Event Handlers ---
 

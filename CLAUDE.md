@@ -50,7 +50,7 @@ npm run lint        # Run ESLint (if configured)
 ```
 
 **Default Ports**:
-- Docker Frontend: `http://localhost:3000`
+- Docker Frontend: `http://localhost:3002`
 - Docker Backend: `http://localhost:3001`
 - Dev Frontend: `http://localhost:5173`
 - Dev Backend: `http://localhost:3001`
@@ -64,7 +64,7 @@ npm run lint        # Run ESLint (if configured)
 
 ```bash
 # Clone and setup
-git clone https://github.com/your-username/hotsearch-monitor.git
+git clone https://github.com/baoxinwen/hotsearch-monitor.git
 cd hotsearch-monitor
 cp .env.docker.example .env
 
@@ -73,7 +73,7 @@ cp .env.docker.example .env
 # - SMTP_PASSWORD: Your 163 authorization code
 # - API_KEY: Custom API key
 
-# Start services
+# Start services (uses pre-built images from GHCR)
 docker-compose up -d
 ```
 
@@ -83,8 +83,16 @@ The project uses a multi-container setup:
 
 | Service | Image | Port | Purpose |
 |---------|-------|------|---------|
-| frontend | trendmonitor-frontend | 3000 | React app served by nginx |
+| frontend | trendmonitor-frontend | 3002 | React app served by nginx |
 | backend | trendmonitor-backend | 3001 | NestJS API server |
+
+### Pre-built Images from GHCR
+
+The project uses pre-built images from GitHub Container Registry:
+- **Frontend**: `ghcr.io/baoxinwen/trendmonitor-frontend:latest`
+- **Backend**: `ghcr.io/baoxinwen/trendmonitor-backend:latest`
+
+These support multi-platform (linux/amd64, linux/arm64).
 
 ### Docker Files Reference
 
@@ -99,7 +107,7 @@ The project uses a multi-container setup:
 
 ### GitHub Actions CI/CD
 
-Pushing to `main` branch or creating a version tag triggers automated builds:
+Pushing to `main`/`master` branch or creating a version tag triggers automated builds:
 - Multi-platform images (linux/amd64, linux/arm64)
 - Pushes to GitHub Container Registry (ghcr.io)
 - Tags: `latest`, branch name, version tags
@@ -110,7 +118,7 @@ Required variables in `.env`:
 - `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_HOST` - Email configuration
 - `API_KEY` - API authentication key
 - `CORS_ORIGIN` - Allowed origins for API access
-- `FRONTEND_PORT`, `BACKEND_PORT` - Port mappings
+- `FRONTEND_PORT`, `BACKEND_PORT` - Port mappings (default: 3002, 3001)
 
 ### Data Persistence
 
@@ -133,12 +141,14 @@ hotsearch-monitor/
 ├── components/           # React Components
 │   ├── AnalysisView.tsx # Trend analysis with bar charts
 │   ├── EmailModal.tsx   # Email subscription settings
-│   ├── FilterBar.tsx    # Platform filter with auto-collapse
+│   ├── FilterBar.tsx    # Platform filter with scroll-based collapse
 │   ├── HistoryView.tsx  # Historical snapshots view
 │   ├── PlatformCard.tsx # Individual platform hot search cards
 │   └── Sidebar.tsx      # Navigation sidebar
 ├── src/api/             # API configuration
 ├── utils/               # Utility functions
+├── services/            # API services
+│   └── geminiService.ts # UApiPro integration
 ├── types.ts            # Core TypeScript definitions
 ├── constants.ts        # Platform categories and display configs
 └── index.html          # Entry point with Tailwind CDN
@@ -153,6 +163,8 @@ server/
 │   ├── auth/                # API Key authentication (@Public() decorator)
 │   ├── config/              # Email configuration CRUD
 │   ├── hotsearch/          # Hot search data fetching
+│   │   ├── utils/          # Platform mapper, score parser
+│   │   └── dto/            # Data transfer objects
 │   ├── email/               # Nodemailer + Handlebars templates
 │   ├── scheduler/          # Cron jobs (hourly, daily, weekly)
 │   └── storage/            # JSON file persistence with backups
@@ -175,6 +187,13 @@ Handles Chinese numerical units (亿=100M, 万=10K, kw=10M, 千万=10M):
 - Frontend: `services/geminiService.ts` - `parseScore()` function
 - Backend: `server/src/hotsearch/utils/score-parser.util.ts`
 
+**Important**: The API returns `hot_value` field (not `hot` or `heat`), which is checked first in the score parsing logic.
+
+### Score Display Format
+In `PlatformCard.tsx`, scores are formatted for display:
+- **Score >= 10000**: Shows "w" format (e.g., `36.2w`, `1.5w`)
+- **Score < 10000**: Shows actual number with locale formatting (e.g., `5,234`, `856`)
+
 ### Type Synchronization
 Core types are defined in `types.ts` at the root. Backend DTOs mirror these types in `server/src/hotsearch/dto/`. When adding fields, update both.
 
@@ -192,6 +211,7 @@ X-API-Key: your-secret-api-key
 **Public Endpoints** (no auth required):
 - `GET /api/hotsearch` - Fetch hot search data
 - `GET /api/hotsearch/platforms` - Get available platforms
+- `GET /api/health` - Health check for Docker
 - `GET /api/docs` - Swagger documentation
 
 **Protected Endpoints** (require auth):
@@ -204,12 +224,27 @@ X-API-Key: your-secret-api-key
 To make an endpoint public, add `@Public()` decorator to the controller method:
 
 ```typescript
+import { Public } from '../auth/decorators/api-public.decorator';
+
 @Public()
 @Get()
 getAllHotSearches() {
   // ...
 }
 ```
+
+---
+
+## LocalStorage Persistence
+
+The application persists user preferences to localStorage:
+
+| Key | Purpose | Default Value |
+|-----|---------|---------------|
+| `trendmonitor_history` | Saved snapshots | `[]` |
+| `trendmonitor_selected_platforms` | Selected platforms | `['Weibo', 'Baidu', 'Zhihu', 'Bilibili', 'Douyin']` |
+| `trendmonitor_auto_refresh` | Auto-refresh enabled | `false` |
+| `theme` | Dark/Light mode | System preference |
 
 ---
 
@@ -290,6 +325,33 @@ Danger:         #ef4444
 
 ## Known Issues & Solutions
 
+### Issue: Hot Scores Showing as 0
+**Solution**: Fixed by adding `hot_value` field to score parsing (highest priority):
+```typescript
+score: parseScore(item.hot_value || item.hot || item.heat || item.score || item.value)
+```
+
+### Issue: Small Scores Displaying as "0.0w"
+**Solution**: Modified display logic in `PlatformCard.tsx`:
+```typescript
+{item.score >= 10000 ? (item.score / 10000).toFixed(1) + 'w' : item.score.toLocaleString()}
+```
+
+### Issue: Platform Selection Not Persisting
+**Solution**: Added localStorage persistence in `App.tsx`:
+```typescript
+// Initialize from localStorage
+const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(() => {
+  const saved = localStorage.getItem('trendmonitor_selected_platforms');
+  return saved ? JSON.parse(saved) : [/* defaults */];
+});
+
+// Save to localStorage on change
+useEffect(() => {
+  localStorage.setItem('trendmonitor_selected_platforms', JSON.stringify(selectedPlatforms));
+}, [selectedPlatforms]);
+```
+
 ### Issue: Black Border on Bar Chart Click
 **Solution**: Global CSS rule in `index.html`:
 ```css
@@ -336,6 +398,7 @@ if (!scrollStateRef.current.isAnimating) {
 - Lift state up only when necessary
 - Use refs for values that don't trigger re-renders
 - Avoid prop drilling by keeping related state together
+- Persist user preferences to localStorage (platform selection, auto-refresh, theme)
 
 ### Performance Optimization
 - Implement cache cleanup for memory management
@@ -361,6 +424,8 @@ if (!scrollStateRef.current.isAnimating) {
 - [ ] Email functionality works (test with test email button)
 - [ ] All major features work in both light and dark mode
 - [ ] Mobile responsive design works
+- [ ] Hot scores display correctly (check platforms with different score ranges)
+- [ ] Platform selection and auto-refresh persist after page reload
 
 ---
 
@@ -391,6 +456,7 @@ CORS_ORIGIN=http://localhost:5173,http://192.168.1.94:5173
 - Verify all useCallback dependencies are correct
 - Ensure useState/setRef is declared before use
 - Check for stale closures in timers/intervals
+- Verify no duplicate import statements
 
 ---
 
@@ -401,11 +467,15 @@ CORS_ORIGIN=http://localhost:5173,http://192.168.1.94:5173
 | `types.ts` | Core type definitions (Platform, HotSearchItem, etc.) |
 | `services/geminiService.ts` | API integration with platform mapping |
 | `components/FilterBar.tsx` | Platform filter with scroll-based collapse |
+| `components/PlatformCard.tsx` | Platform hot search cards with score formatting |
 | `components/AnalysisView.tsx` | Trend analysis with bar charts |
 | `server/src/email/email.service.ts` | Email sending with Handlebars templates |
 | `server/src/scheduler/jobs/*.ts` | Scheduled email jobs |
 | `server/src/auth/guards/api-key.guard.ts` | API Key authentication |
+| `server/src/auth/decorators/api-public.decorator.ts` | @Public() decorator for public endpoints |
 | `server/src/health/health.controller.ts` | Health check endpoint for Docker |
+| `server/src/hotsearch/utils/score-parser.util.ts` | Score parsing with Chinese units |
+| `server/src/hotsearch/utils/platform-mapper.util.ts` | Platform to API type mapping |
 | `index.html` | Global styles, fonts, and Tailwind config |
 | `src/api/config.ts` | Centralized API configuration |
 | `Dockerfile` | Frontend Docker image build |
@@ -421,7 +491,8 @@ CORS_ORIGIN=http://localhost:5173,http://192.168.1.94:5173
 - This project uses CDN-based Tailwind CSS via `index.html`
 - Font imports: Plus Jakarta Sans + Noto Sans SC via Google Fonts
 - The frontend uses esm.sh for module imports (check `index.html` importmap)
-- LocalStorage is used for saving history snapshots (`trendmonitor_history`)
+- LocalStorage is used for saving user preferences (history, platforms, theme)
 - JSON file storage is used for email config persistence
+- Some platforms (like 知乎日报, NGA) don't return hot values - this is expected behavior
 - Focus on code quality, performance, and user experience
 - The project name was TrendSentinel, now updated to TrendMonitor

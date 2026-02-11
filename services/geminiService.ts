@@ -185,7 +185,7 @@ export const fetchPlatformHotSearches = async (platform: Platform, forceRefresh:
       rank: index + 1,
       // UApi 通用字段：title, desc, pic, hot, url, mobileUrl
       title: item.title || '未知标题',
-      score: parseScore(item.hot || item.heat || item.score || item.value),
+      score: parseScore(item.hot_value || item.hot || item.heat || item.score || item.value),
       platform: platform,
       url: item.url || item.link || item.mobileUrl || '#',
       timestamp: Date.now(),
