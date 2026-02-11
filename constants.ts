@@ -1,5 +1,6 @@
 import { Platform, HotSearchItem } from './types';
 
+// 平台分类
 export const PLATFORM_CATEGORIES = {
   '视频/社区': [
     Platform.Bilibili, Platform.Acfun, Platform.Weibo, Platform.Zhihu, Platform.ZhihuDaily,
@@ -24,8 +25,9 @@ export const PLATFORM_CATEGORIES = {
   ]
 };
 
+// 平台显示配置（标签、颜色、图标）
 export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; icon: string }> = {
-  // Video/Community
+  // 视频/社区
   [Platform.Bilibili]: { label: 'Bilibili', color: 'bg-pink-400', icon: '📺' },
   [Platform.Acfun]: { label: 'AcFun', color: 'bg-red-500', icon: '🅰️' },
   [Platform.Weibo]: { label: '微博', color: 'bg-red-500', icon: '🔥' },
@@ -43,7 +45,7 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
   [Platform.Hostloc]: { label: 'Hostloc', color: 'bg-indigo-600', icon: '🌐' },
   [Platform.Coolapk]: { label: '酷安', color: 'bg-green-500', icon: '📱' },
 
-  // News/Info
+  // 新闻/资讯
   [Platform.Baidu]: { label: '百度', color: 'bg-blue-600', icon: '🐾' },
   [Platform.ThePaper]: { label: '澎湃', color: 'bg-cyan-600', icon: '🗞️' },
   [Platform.Toutiao]: { label: '头条', color: 'bg-red-600', icon: '📰' },
@@ -54,7 +56,7 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
   [Platform.Huxiu]: { label: '虎嗅', color: 'bg-gray-800', icon: '🐯' },
   [Platform.Ifanr]: { label: '爱范儿', color: 'bg-red-400', icon: '❤️' },
 
-  // Tech/IT
+  // 技术/IT
   [Platform.Sspai]: { label: '少数派', color: 'bg-red-500', icon: '🥧' },
   [Platform.ITHome]: { label: 'IT之家', color: 'bg-red-700', icon: '🏠' },
   [Platform.ITHomeXijiayi]: { label: 'IT之家喜加一', color: 'bg-red-600', icon: '🎁' },
@@ -67,13 +69,13 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
   [Platform.Nodeseek]: { label: 'NodeSeek', color: 'bg-gray-600', icon: '🔍' },
   [Platform.HelloGithub]: { label: 'HelloGitHub', color: 'bg-gray-800', icon: '🐙' },
 
-  // Game
+  // 游戏
   [Platform.Lol]: { label: '英雄联盟', color: 'bg-yellow-600', icon: '🎮' },
   [Platform.Genshin]: { label: '原神', color: 'bg-purple-500', icon: '✨' },
   [Platform.Honkai]: { label: '崩坏3', color: 'bg-blue-400', icon: '🚀' },
   [Platform.Starrail]: { label: '星穹铁道', color: 'bg-indigo-500', icon: '🚂' },
 
-  // Other
+  // 其他
   [Platform.Weread]: { label: '微信读书', color: 'bg-blue-400', icon: '📚' },
   [Platform.WeatherAlarm]: { label: '天气预警', color: 'bg-orange-500', icon: '⛈️' },
   [Platform.Earthquake]: { label: '地震速报', color: 'bg-gray-800', icon: '🌋' },
@@ -82,7 +84,7 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
 
 export const INITIAL_KEYWORDS: string[] = [];
 
-// Helper to generate some dummy data if API fails
+// 辅助函数：当 API 失败时生成模拟数据
 export const generateMockData = (platform: Platform): HotSearchItem[] => {
   return Array.from({ length: 5 }).map((_, i) => ({
     id: `${platform}-${Date.now()}-${i}`,
