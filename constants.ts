@@ -84,16 +84,3 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
 
 export const INITIAL_KEYWORDS: string[] = [];
 
-// 辅助函数：当 API 失败时生成模拟数据
-export const generateMockData = (platform: Platform): HotSearchItem[] => {
-  return Array.from({ length: 5 }).map((_, i) => ({
-    id: `${platform}-${Date.now()}-${i}`,
-    rank: i + 1,
-    title: `模拟数据: ${platform} 热搜 #${i+1}`,
-    score: Math.floor(Math.random() * 100000),
-    platform: platform,
-    url: '#',
-    timestamp: Date.now(),
-    category: '模拟'
-  }));
-};
