@@ -7,7 +7,8 @@ import HistoryView from './components/HistoryView';
 import AnalysisView from './components/AnalysisView';
 import { HotSearchItem, Platform, ViewMode, EmailConfig, HistorySnapshot } from './types';
 import { PLATFORM_CATEGORIES } from './constants';
-import { fetchPlatformHotSearches } from './services/geminiService';
+import { fetchPlatformHotSearches as fetchDirectHotSearches } from './services/geminiService';
+import { buildUrl, getApiHeaders, API_ENDPOINTS } from './src/api/config';
 import { Save, Download, ArrowLeft, Clock, Menu, CheckCircle, AlertCircle } from 'lucide-react';
 import { buildUrl, getApiHeaders, API_ENDPOINTS } from './src/api/config';
 
@@ -101,14 +102,36 @@ const App: React.FC = () => {
   const fetchSpecificPlatform = useCallback(async (platform: Platform): Promise<HotSearchItem[]> => {
     updateLoading([platform], true);
     try {
-      const newItems = await fetchPlatformHotSearches(platform, true);
-      setItems(prevItems => {
-        const otherItems = prevItems.filter(i => i.platform !== platform);
-        return [...otherItems, ...newItems].sort((a, b) => b.score - a.score);
-      });
-      return newItems;
+      // 检查是否应该使用后端 API（Docker 环境）
+      const apiBase = import.meta.env.VITE_API_BASE || '';
+      const useBackendAPI = apiBase.startsWith('/api');
+
+      if (useBackendAPI) {
+        // 使用后端 API
+        const response = await fetch(buildUrl(`/hotsearch?platform=${platform}`), {
+          headers: getApiHeaders(),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setItems(prevItems => {
+            const otherItems = prevItems.filter(i => i.platform !== platform);
+            return [...otherItems, ...data].sort((a, b) => b.score - a.score);
+          });
+          return data;
+        }
+        return [];
+      } else {
+        // 开发环境 - 直接调用外部 API
+        const newItems = await fetchDirectHotSearches(platform, true);
+        setItems(prevItems => {
+          const otherItems = prevItems.filter(i => i.platform !== platform);
+          return [...otherItems, ...newItems].sort((a, b) => b.score - a.score);
+        });
+        return newItems;
+      }
     } catch (error) {
-      console.error(`Error fetching ${platform}:`, error);
+      console.error(`获取 ${platform} 数据失败:`, error);
       return [];
     } finally {
       updateLoading([platform], false);
@@ -128,27 +151,53 @@ const App: React.FC = () => {
     updateLoading(platformsToFetch, true);
 
     try {
-      const CHUNK_SIZE = 2;
-      const allNewItems: HotSearchItem[] = [];
+      // 检查是否应该使用后端 API（Docker 环境）
+      const apiBase = import.meta.env.VITE_API_BASE || '';
+      const useBackendAPI = apiBase.startsWith('/api');
 
-      for (let i = 0; i < platformsToFetch.length; i += CHUNK_SIZE) {
-        const chunk = platformsToFetch.slice(i, i + CHUNK_SIZE);
-        const promises = chunk.map(p => fetchPlatformHotSearches(p, !isAuto));
-        const results = await Promise.all(promises);
-        results.forEach(res => allNewItems.push(...res));
+      if (useBackendAPI) {
+        // 使用后端 API - 批量获取所有平台数据
+        const platformParam = platformsToFetch.join(',');
+        const response = await fetch(buildUrl(`/hotsearch?platform=${platformParam}`), {
+          headers: getApiHeaders(),
+        });
 
-        if (i + CHUNK_SIZE < platformsToFetch.length) {
-          await new Promise(resolve => setTimeout(resolve, 800));
+        if (response.ok) {
+          const data = await response.json();
+          setItems(prevItems => {
+            const keptItems = prevItems.filter(i => !platformsToFetch.includes(i.platform));
+            return [...keptItems, ...data].sort((a, b) => b.score - a.score);
+          });
+        } else {
+          throw new Error(`API 错误：${response.status}`);
         }
+      } else {
+        // 开发环境 - 直接调用外部 API
+        const CHUNK_SIZE = 2;
+        const allNewItems: HotSearchItem[] = [];
+
+        for (let i = 0; i < platformsToFetch.length; i += CHUNK_SIZE) {
+          const chunk = platformsToFetch.slice(i, i + CHUNK_SIZE);
+          const promises = chunk.map(p => fetchDirectHotSearches(p, !isAuto));
+          const results = await Promise.all(promises);
+          results.forEach(res => allNewItems.push(...res));
+
+          if (i + CHUNK_SIZE < platformsToFetch.length) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+        }
+
+        setItems(prevItems => {
+          const keptItems = prevItems.filter(i => !platformsToFetch.includes(i.platform));
+          return [...keptItems, ...allNewItems].sort((a, b) => b.score - a.score);
+        });
       }
 
-      setItems(prevItems => {
-        const keptItems = prevItems.filter(i => !platformsToFetch.includes(i.platform));
-        return [...keptItems, ...allNewItems].sort((a, b) => b.score - a.score);
-      });
-
     } catch (err) {
-      console.error("Error fetching data:", err);
+      console.error("获取数据失败:", err);
+      if (!isAuto) {
+        showToast("获取数据失败，请稍后重试", "info");
+      }
     } finally {
       updateLoading(platformsToFetch, false);
     }
