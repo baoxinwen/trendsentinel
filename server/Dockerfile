@@ -38,6 +38,9 @@ RUN npm install --production && \
 # Copy built assets from builder stage
 COPY --from=builder /app/dist ./dist
 
+# Copy email templates (needed for email functionality)
+COPY --from=builder /app/src/email/templates ./dist/email/templates
+
 # Create data directory with proper permissions
 RUN mkdir -p /app/data && \
     chown -R nestjs:nodejs /app
