@@ -8,6 +8,8 @@ services:
       - "${FRONTEND_PORT:-3002}:80"
     environment:
       - NODE_ENV=production
+      - VITE_API_BASE=/api
+      - VITE_API_KEY=docker-api-key
     depends_on:
       - backend
     networks:

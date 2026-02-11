@@ -13,7 +13,13 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build the application
+# Build the application with production API base URL
+# Using relative path /api so nginx can proxy to backend
+ARG VITE_API_BASE=/api
+ENV VITE_API_BASE=${VITE_API_BASE}
+ARG VITE_API_KEY=docker-api-key
+ENV VITE_API_KEY=${VITE_API_KEY}
+
 RUN npm run build
 
 # Stage 2: Production with nginx
