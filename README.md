@@ -77,7 +77,7 @@ docker-compose down
 ```
 
 服务启动后访问：
-- 前端：http://localhost:3000
+- 前端：http://localhost:3002
 - 后端 API：http://localhost:3001
 - Swagger 文档：http://localhost:3001/docs
 

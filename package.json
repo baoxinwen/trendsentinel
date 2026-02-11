@@ -11,11 +11,8 @@
   "dependencies": {
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "@google/genai": "^1.40.0",
     "recharts": "^3.7.0",
     "lucide-react": "^0.563.0",
-    "d3": "7",
-    "d3-cloud": "1",
     "segmentit": "2.0.3"
   },
   "devDependencies": {
