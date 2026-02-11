@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Frontend - React + Vite + nginx
+  # 前端 - React + Vite + nginx
   frontend:
     image: ghcr.io/baoxinwen/trendsentinel-frontend:latest
     container_name: trendmonitor-frontend
@@ -21,7 +21,7 @@ services:
       retries: 3
       start_period: 10s
 
-  # Backend - NestJS API
+  # 后端 - NestJS API
   backend:
     image: ghcr.io/baoxinwen/trendsentinel-backend:latest
     container_name: trendmonitor-backend
@@ -32,28 +32,28 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - API_PREFIX=api
-      # CORS - Allow frontend origin
+      # 跨域配置 - 允许前端源
       - CORS_ORIGIN=http://localhost:3002,http://localhost:${FRONTEND_PORT:-3002}
-      # SMTP Configuration (163 Email)
+      # 邮件服务配置（163 邮箱）
       - SMTP_HOST=${SMTP_HOST:-smtp.163.com}
       - SMTP_PORT=${SMTP_PORT:-465}
       - SMTP_SECURE=${SMTP_SECURE:-true}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - MAIL_FROM=${MAIL_FROM:-TrendMonitor <noreply@trendmonitor.com>}
-      # API Authentication
+      # API 身份验证
       - API_KEY=${API_KEY}
       - API_KEY_HEADER=X-API-Key
-      # API Configuration
+      # API 配置
       - UAPI_BASE_URL=https://uapis.cn/api/v1/misc/hotboard
       - API_TIMEOUT=15000
       - CACHE_DURATION=60000
-      # Storage
+      # 存储配置
       - DATA_DIR=/app/data
-      # Swagger
+      # Swagger 文档
       - SWAGGER_ENABLED=${SWAGGER_ENABLED:-true}
     volumes:
-      # Persist email configuration and snapshots
+      # 持久化邮件配置和快照数据
       - trendmonitor-data:/app/data
     networks:
       - trendmonitor-network

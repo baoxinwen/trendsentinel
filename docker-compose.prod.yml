@@ -1,10 +1,10 @@
 version: '3.8'
 
-# Production Docker Compose configuration
-# Usage: docker-compose -f docker-compose.prod.yml up -d
+# 生产环境 Docker Compose 配置
+# 使用方式：docker-compose -f docker-compose.prod.yml up -d
 
 services:
-  # Frontend - React + Vite + nginx
+  # 前端 - React + Vite + nginx
   frontend:
     image: ghcr.io/baoxinwen/trendsentinel-frontend:latest
     container_name: trendmonitor-frontend
@@ -29,7 +29,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Backend - NestJS API
+  # 后端 - NestJS API
   backend:
     image: ghcr.io/baoxinwen/trendsentinel-backend:latest
     container_name: trendmonitor-backend
@@ -40,28 +40,28 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - API_PREFIX=api
-      # CORS - Should be set to your actual domain
+      # 跨域配置 - 应设置为你的实际域名
       - CORS_ORIGIN=${CORS_ORIGIN:-https://yourdomain.com}
-      # SMTP Configuration
+      # 邮件服务配置
       - SMTP_HOST=${SMTP_HOST:-smtp.163.com}
       - SMTP_PORT=${SMTP_PORT:-465}
       - SMTP_SECURE=${SMTP_SECURE:-true}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - MAIL_FROM=${MAIL_FROM:-TrendMonitor <noreply@trendmonitor.com>}
-      # API Authentication
+      # API 身份验证
       - API_KEY=${API_KEY}
       - API_KEY_HEADER=X-API-Key
-      # API Configuration
+      # API 配置
       - UAPI_BASE_URL=https://uapis.cn/api/v1/misc/hotboard
       - API_TIMEOUT=15000
       - CACHE_DURATION=60000
-      # Storage
+      # 存储配置
       - DATA_DIR=/app/data
-      # Swagger (disable in production if desired)
+      # Swagger 文档（生产环境可禁用）
       - SWAGGER_ENABLED=${SWAGGER_ENABLED:-false}
     volumes:
-      # Persist email configuration and snapshots
+      # 持久化邮件配置和快照数据
       - trendmonitor-data:/app/data
     networks:
       - trendmonitor-network

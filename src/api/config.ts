@@ -1,16 +1,16 @@
 /**
- * API Configuration
- * Centralized configuration for API endpoints and authentication
+ * API 配置
+ * API 端点和身份验证的集中配置
  */
 
-// API base URL - configurable via environment variable
+// API 基础 URL - 可通过环境变量配置
 export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
-// API Key - for development only
-// In production, this should be handled by backend authentication
+// API 密钥 - 仅用于开发环境
+// 生产环境中应在后端进行身份验证
 export const API_KEY = import.meta.env.VITE_API_KEY || 'dev-api-key-change-in-production';
 
-// API endpoints
+// API 端点
 export const API_ENDPOINTS = {
   config: {
     email: '/config/email',
@@ -30,12 +30,12 @@ export const API_ENDPOINTS = {
   },
 } as const;
 
-// Helper function to build API URLs
+// 构建 API URL 的辅助函数
 export const buildUrl = (endpoint: string): string => {
   return `${API_BASE}${endpoint}`;
 };
 
-// Helper function to get API headers
+// 获取 API 请求头的辅助函数
 export const getApiHeaders = (): HeadersInit => {
   return {
     'Content-Type': 'application/json',

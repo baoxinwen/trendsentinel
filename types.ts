@@ -1,5 +1,6 @@
+// 平台枚举
 export enum Platform {
-  // Video/Community
+  // 视频/社区
   Bilibili = 'Bilibili',
   Acfun = 'Acfun',
   Weibo = 'Weibo',
@@ -17,7 +18,7 @@ export enum Platform {
   Hostloc = 'Hostloc',
   Coolapk = 'Coolapk',
 
-  // News/Info
+  // 新闻/资讯
   Baidu = 'Baidu',
   ThePaper = 'ThePaper',
   Toutiao = 'Toutiao',
@@ -28,7 +29,7 @@ export enum Platform {
   Huxiu = 'Huxiu',
   Ifanr = 'Ifanr',
 
-  // Tech/IT
+  // 科技/IT
   Sspai = 'Sspai',
   ITHome = 'ITHome',
   ITHomeXijiayi = 'ITHomeXijiayi',
@@ -41,43 +42,47 @@ export enum Platform {
   Nodeseek = 'Nodeseek',
   HelloGithub = 'HelloGithub',
 
-  // Game
+  // 游戏
   Lol = 'Lol',
   Genshin = 'Genshin',
   Honkai = 'Honkai',
   Starrail = 'Starrail',
 
-  // Other
+  // 其他
   Weread = 'Weread',
   WeatherAlarm = 'WeatherAlarm',
   Earthquake = 'Earthquake',
   History = 'History'
 }
 
+// 热搜条目接口
 export interface HotSearchItem {
   id: string;
   rank: number;
   title: string;
-  score: number; // Heat score
+  score: number; // 热度值
   platform: Platform;
   url: string;
   category?: string;
   timestamp: number;
 }
 
+// 筛选状态接口
 export interface FilterState {
   keywords: string[];
   platforms: Platform[];
   minScore: number;
 }
 
+// 邮件配置接口
 export interface EmailConfig {
   recipients: string[];
   frequency: 'hourly' | 'daily' | 'weekly';
-  sendTime: string; // HH:mm
+  sendTime: string; // HH:mm 格式
   enabled: boolean;
 }
 
+// 历史快照接口
 export interface HistorySnapshot {
   id: string;
   timestamp: number;
@@ -85,4 +90,5 @@ export interface HistorySnapshot {
   note?: string;
 }
 
+// 视图模式类型
 export type ViewMode = 'dashboard' | 'history' | 'email' | 'analysis' | 'snapshot';
