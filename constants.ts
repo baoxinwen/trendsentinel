@@ -84,3 +84,7 @@ export const PLATFORM_CONFIG: Record<Platform, { label: string; color: string; i
 
 export const INITIAL_KEYWORDS: string[] = [];
 
+// 导出时间相关常量
+export { TIMING, PLATFORM_LIMITS, UI } from './constants/timing';
+
+

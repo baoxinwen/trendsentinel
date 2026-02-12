@@ -1,9 +1,11 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { HotsearchService } from './hotsearch.service';
-import { HotSearchItemDto, FetchHotSearchDto } from './dto/hotsearch-item.dto';
+import { HotSearchItemDto } from './dto/hotsearch-item.dto';
+import { FetchHotSearchDto } from './dto/fetch-hotsearch.dto';
 import { Platform } from './interfaces/platform.enum';
 import { Public } from '../auth/decorators/api-public.decorator';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard';
 
 @ApiTags('hotsearch')
 @Controller('hotsearch')
@@ -83,6 +85,7 @@ export class HotsearchController {
   }
 
   @Get('cache/stats')
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({ summary: 'Get cache statistics' })
   @ApiResponse({
     status: 200,
@@ -93,6 +96,7 @@ export class HotsearchController {
   }
 
   @Get('cache/clear')
+  @UseGuards(ApiKeyGuard)
   @ApiOperation({ summary: 'Clear cache' })
   @ApiResponse({
     status: 200,

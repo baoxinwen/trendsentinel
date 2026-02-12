@@ -6,9 +6,10 @@ import EmailModal from './components/EmailModal';
 import HistoryView from './components/HistoryView';
 import AnalysisView from './components/AnalysisView';
 import { HotSearchItem, Platform, ViewMode, EmailConfig, HistorySnapshot } from './types';
-import { PLATFORM_CATEGORIES } from './constants';
+import { PLATFORM_CATEGORIES, TIMING, PLATFORM_LIMITS, UI } from './constants';
 import { fetchPlatformHotSearches as fetchDirectHotSearches } from './services/geminiService';
 import { buildUrl, getApiHeaders, API_ENDPOINTS } from './src/api/config';
+import { getStorageItem, setStorageItem, STORAGE_KEYS } from './utils/storage';
 import { Save, Download, ArrowLeft, Clock, Menu, CheckCircle, AlertCircle } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -17,8 +18,9 @@ const App: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [items, setItems] = useState<HotSearchItem[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    if (localStorage.getItem('theme') === 'dark') return true;
-    if (localStorage.getItem('theme') === 'light') return false;
+    const savedTheme = getStorageItem(STORAGE_KEYS.THEME, 'system' as 'dark' | 'light' | 'system');
+    if (savedTheme === 'dark') return true;
+    if (savedTheme === 'light') return false;
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
@@ -31,20 +33,10 @@ const App: React.FC = () => {
   // Filters
   const [keywords, setKeywords] = useState<string[]>([]);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(() => {
-    try {
-      const saved = localStorage.getItem('trendmonitor_selected_platforms');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        // 验证解析后的平台是否有效
-        if (Array.isArray(parsed) && parsed.every(p => Object.values(Platform).includes(p))) {
-          return parsed;
-        }
-      }
-    } catch (error) {
-      console.error('Failed to parse selected platforms from localStorage:', error);
-    }
-    // 默认平台
-    return [Platform.Weibo, Platform.Baidu, Platform.Zhihu, Platform.Bilibili, Platform.Douyin];
+    return getStorageItem(
+      STORAGE_KEYS.SELECTED_PLATFORMS,
+      [Platform.Weibo, Platform.Baidu, Platform.Zhihu, Platform.Bilibili, Platform.Douyin]
+    );
   });
 
   // Ref to track latest selectedPlatforms for auto-refresh
@@ -52,13 +44,7 @@ const App: React.FC = () => {
 
   // Auto Refresh
   const [autoRefresh, setAutoRefresh] = useState(() => {
-    try {
-      const saved = localStorage.getItem('trendmonitor_auto_refresh');
-      return saved === 'true';
-    } catch (error) {
-      console.error('Failed to parse auto refresh from localStorage:', error);
-      return false;
-    }
+    return getStorageItem(STORAGE_KEYS.AUTO_REFRESH, false);
   });
 
   // History
@@ -248,10 +234,10 @@ const App: React.FC = () => {
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
+      setStorageItem(STORAGE_KEYS.THEME, 'dark');
     } else {
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+      setStorageItem(STORAGE_KEYS.THEME, 'light');
     }
   }, [isDarkMode]);
 
@@ -280,17 +266,17 @@ const App: React.FC = () => {
   }, [autoRefresh, view, fetchAllData]);
 
   useEffect(() => {
-    localStorage.setItem('trendmonitor_history', JSON.stringify(history));
+    setStorageItem(STORAGE_KEYS.HISTORY, history);
   }, [history]);
 
   // 保存选中的平台到 localStorage
   useEffect(() => {
-    localStorage.setItem('trendmonitor_selected_platforms', JSON.stringify(selectedPlatforms));
+    setStorageItem(STORAGE_KEYS.SELECTED_PLATFORMS, selectedPlatforms);
   }, [selectedPlatforms]);
 
   // 保存自动刷新状态到 localStorage
   useEffect(() => {
-    localStorage.setItem('trendmonitor_auto_refresh', String(autoRefresh));
+    setStorageItem(STORAGE_KEYS.AUTO_REFRESH, autoRefresh);
   }, [autoRefresh]);
 
   // --- Event Handlers ---

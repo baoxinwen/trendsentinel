@@ -6,8 +6,11 @@ import compression from 'compression';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+  const isProduction = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create(AppModule, {
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: isProduction
+      ? ['error', 'warn']
+      : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
   const configService = app.get(ConfigService);
@@ -16,13 +19,29 @@ async function bootstrap() {
   const apiPrefix = configService.get<string>('API_PREFIX', 'api');
   app.setGlobalPrefix(apiPrefix);
 
-  // CORS configuration
-  const corsOrigin = configService.get<string>('CORS_ORIGIN', '*');
+  // CORS configuration - 使用 origin 函数进行安全验证
+  const corsOrigin = configService.get<string>('CORS_ORIGIN', 'http://localhost:3002');
+  const allowedOrigins = corsOrigin.split(',').map(origin => origin.trim());
+
   app.enableCors({
-    origin: corsOrigin === '*' ? true : corsOrigin.split(','),
+    origin: (origin, callback) => {
+      // 允许没有 origin 的请求（如移动应用、Postman 等）
+      if (!origin) return callback(null, true);
+
+      // 移除端口号进行统一比较
+      const originWithoutPort = origin.replace(/:\d+$/, '');
+      const allowedWithoutPorts = allowedOrigins.map(o => o.replace(/:\d+$/, ''));
+
+      if (allowedWithoutPorts.includes(originWithoutPort) || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization, X-API-Key',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 86400, // 24 hours
   });
 
   // Compression

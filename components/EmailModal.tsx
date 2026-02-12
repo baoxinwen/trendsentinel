@@ -3,6 +3,15 @@ import { EmailConfig } from '../types';
 import { Mail, Clock, Plus, Trash2, CheckCircle, Send } from 'lucide-react';
 import { buildUrl, getApiHeaders, API_ENDPOINTS } from '../src/api/config';
 
+/**
+ * 验证邮箱地址格式
+ */
+const isValidEmail = (email: string): boolean => {
+  // 简单但有效的邮箱验证正则
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
 interface EmailModalProps {
   config: EmailConfig;
   onSave: (config: EmailConfig) => void;
@@ -37,12 +46,22 @@ const EmailModal: React.FC<EmailModalProps> = ({ config, onSave }) => {
   }, []);
 
   const handleAddEmail = () => {
-    if (newEmail && newEmail.includes('@')) {
+    const trimmedEmail = newEmail.trim();
+
+    if (!trimmedEmail) {
+      return;
+    }
+
+    if (isValidEmail(trimmedEmail)) {
       setLocalConfig(prev => ({
         ...prev,
-        recipients: [...prev.recipients, newEmail]
+        recipients: [...prev.recipients, trimmedEmail.toLowerCase()]
       }));
       setNewEmail('');
+    } else {
+      // 显示错误提示
+      setMessage('请输入有效的邮箱地址');
+      setTimeout(() => setMessage(''), 3000);
     }
   };
 

@@ -46,7 +46,8 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     if (!this.isValidApiKey(apiKey)) {
-      this.logger.warn(`Invalid API Key attempt from ${request.ip}`);
+      // 不记录 IP 地址以保护用户隐私，只记录事件
+      this.logger.warn('Invalid API Key attempt');
       throw new UnauthorizedException('Invalid API Key');
     }
 

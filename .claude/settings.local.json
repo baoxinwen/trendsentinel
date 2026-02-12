@@ -7,7 +7,14 @@
       "Bash(git add:*)",
       "Bash(git push:*)",
       "Bash(gh run list:*)",
-      "Bash(gh run view:*)"
+      "Bash(gh run view:*)",
+      "Bash(npm run start:dev:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(powershell:*)",
+      "Bash(dir /s /b *.ts *.tsx *.js *.jsx *.json *.html *.yml *.yaml)"
     ]
   }
 }

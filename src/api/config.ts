@@ -4,11 +4,14 @@
  */
 
 // API 基础 URL - 可通过环境变量配置
+// 开发环境: http://localhost:3001/api (直接调用后端 API)
+// Docker 环境: /api (通过 nginx 代理到后端)
 export const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001/api';
 
-// API 密钥 - 仅用于开发环境
-// 生产环境中应在后端进行身份验证
-export const API_KEY = import.meta.env.VITE_API_KEY || 'dev-api-key-change-in-production';
+// 判断是否使用后端 API (Docker 环境)
+export const useBackendAPI = (): boolean => {
+  return API_BASE.startsWith('/api') || API_BASE.includes('/api/');
+};
 
 // API 端点
 export const API_ENDPOINTS = {
@@ -36,9 +39,11 @@ export const buildUrl = (endpoint: string): string => {
 };
 
 // 获取 API 请求头的辅助函数
+// Docker 环境下不需要 API Key，直接使用后端代理
+// 开发环境下后端 API 也是公开的，不需要认证
 export const getApiHeaders = (): HeadersInit => {
-  return {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    'X-API-Key': API_KEY,
   };
+  return headers;
 };

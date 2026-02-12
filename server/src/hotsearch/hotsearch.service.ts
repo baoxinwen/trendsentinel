@@ -6,17 +6,11 @@ import { Platform } from './interfaces/platform.enum';
 import { HotSearchItemDto } from './dto/hotsearch-item.dto';
 import { parseScore } from './utils/score-parser.util';
 import { PLATFORM_API_MAP } from './utils/platform-mapper.util';
+import { UApiResponse, UApiHotItem } from './uapi-types';
 
 interface CacheEntry {
   data: HotSearchItemDto[];
   timestamp: number;
-}
-
-interface ApiResponse {
-  data?: {
-    list?: any[];
-  };
-  list?: any[];
 }
 
 @Injectable()
@@ -60,7 +54,7 @@ export class HotsearchService {
     const url = `${this.baseUrl}?type=${apiType}`;
 
     try {
-      const response = await axios.get<any, AxiosResponse<ApiResponse>>(url, {
+      const response = await axios.get<UApiResponse>(url, {
         timeout: this.timeout,
       });
 
@@ -81,7 +75,7 @@ export class HotsearchService {
       }
 
       const json = response.data;
-      let list: any[] = [];
+      let list: UApiHotItem[] = [];
 
       if (json && json.data && Array.isArray(json.data.list)) {
         list = json.data.list;
@@ -94,7 +88,7 @@ export class HotsearchService {
         return [];
       }
 
-      const mappedItems: HotSearchItemDto[] = list.map((item: any, index: number) => ({
+      const mappedItems: HotSearchItemDto[] = list.map((item: UApiHotItem, index: number) => ({
         id: `${platform}-${Date.now()}-${index}`,
         rank: index + 1,
         title: item.title || '未知标题',
